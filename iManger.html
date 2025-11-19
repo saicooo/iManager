@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iManager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --success: #4cc9f0;
+            --danger: #f72585;
+            --warning: #f8961e;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 20px 0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+        
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .card h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+        }
+        
+        .salary-summary {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .salary-item {
+            text-align: center;
+        }
+        
+        .salary-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .salary-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: var(--success);
+            border-radius: 5px;
+        }
+        
+        .shift-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .shift-summary {
+            background: var(--light);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .shift-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        .btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-warning {
+            background-color: var(--warning);
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .expense-list {
+            margin-top: 20px;
+        }
+        
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .expense-icon {
+            font-size: 1.2rem;
+            margin-right: 10px;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .expense-amount {
+            font-weight: bold;
+            color: var(--danger);
+        }
+        
+        .notes-list {
+            margin-top: 20px;
+        }
+        
+        .note-item {
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .note-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .note-date {
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-align: right;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--primary);
+            color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .expense-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .category-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .category-icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .category-amount {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .month-selector {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+        
+        .month-selector select {
+            width: auto;
+        }
+        
+        .shift-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .shift-controls button {
+            flex: 1;
+        }
+        
+        .salary-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .salary-controls button {
+            flex: 1;
+        }
+        
+        .monthly-history {
+            margin-top: 20px;
+        }
+        
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .download-btn {
+            background-color: var(--success);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        .download-btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* MODERN TASKS SECTION STYLES */
+        .tasks-header {
+            background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 0 0 20px 20px;
+            margin: -20px -20px 25px -20px;
+        }
+        
+        .greeting {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .time-left {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 15px;
+        }
+        
+        .progress-container {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .progress-percent {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .progress-text {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .progress-bar-task {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 3px;
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 15px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+        }
+        
+        .search-container i {
+            color: #8e8e93;
+            margin-right: 10px;
+        }
+        
+        .search-container input {
+            border: none;
+            background: transparent;
+            width: 100%;
+            font-size: 1rem;
+            outline: none;
+        }
+        
+        .categories {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .category-chip {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        
+        .category-chip.active {
+            background: #4361ee;
+            color: white;
+        }
+        
+        .section-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0 15px 0;
+        }
+        
+        .section-title h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .task-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #4361ee;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-item.pinned {
+            border-left-color: #f8961e;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .task-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1d1d1f;
+            margin-bottom: 5px;
+        }
+        
+        .task-description {
+            font-size: 0.9rem;
+            color: #8e8e93;
+            margin-bottom: 10px;
+        }
+        
+        .task-meta {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #8e8e93;
+            margin-bottom: 12px;
+        }
+        
+        .task-date {
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-date i {
+            margin-right: 5px;
+            font-size: 0.7rem;
+        }
+        
+        .task-category {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            margin-right: 8px;
+            background: #f2f2f7;
+            color: #1d1d1f;
+        }
+        
+        .task-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f2f2f7;
+            padding-top: 12px;
+        }
+        
+        .task-status {
+            display: flex;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #8e8e93;
+        }
+        
+        .task-status i {
+            margin-right: 5px;
+        }
+        
+        .task-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .task-btn {
+            background: none;
+            border: none;
+            color: #4361ee;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .task-btn i {
+            margin-right: 5px;
+        }
+        
+        .completed-task {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+        
+        .completed-task .task-title {
+            text-decoration: line-through;
+        }
+        
+        .pinned-badge {
+            background: #f8961e;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .pinned-badge i {
+            margin-right: 5px;
+            font-size: 0.6rem;
+        }
+        
+        .completed-section {
+            margin-top: 30px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #8e8e93;
+        }
+        
+        .empty-state i {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+        
+        .task-form {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .task-form h3 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        /* NEW STYLES FOR TASK ENHANCEMENTS */
+        .fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+        }
+        
+        .task-details-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .task-details-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            position: relative;
+        }
+        
+        .task-details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .task-details-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .task-details-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+        
+        .task-details-body {
+            margin-bottom: 25px;
+        }
+        
+        .task-details-description {
+            margin-bottom: 20px;
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .task-details-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .task-details-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .task-details-actions {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        
+        .task-details-action-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .task-details-action-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .task-details-complete {
+            background: var(--success);
+            color: white;
+        }
+        
+        .task-details-edit {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .task-details-pin {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .task-details-delete {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .task-completed {
+            opacity: 0.7;
+            background: #f8f9fa;
+        }
+        
+        .task-completed .task-title {
+            text-decoration: line-through;
+        }
+        
+        .task-pinned {
+            border-left-color: var(--warning) !important;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard, .shift-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .expense-categories {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .shift-controls, .salary-controls {
+                flex-direction: column;
+            }
+            
+            .categories {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+            }
+            
+            .fab {
+                bottom: 20px;
+                right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+            
+            .task-details-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div>
+                    <h1>iManager</h1>
+                    <p class="subtitle">My personal monthly manager</p>
+                </div>
+                <div>
+                    <p id="current-date">Loading date...</p>
+                </div>
+            </div>
+        </header>
+        
+        <div class="month-selector">
+            <label for="month-select">Viewing:</label>
+            <select id="month-select">
+                <!-- Months will be populated dynamically -->
+            </select>
+            <button class="btn btn-primary" id="new-month-btn">Start New Month</button>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h2>Salary Overview - <span id="current-month"></span></h2>
+                <div class="salary-summary">
+                    <div class="salary-item">
+                        <div class="salary-value" id="current-balance">₽0</div>
+                        <div class="salary-label">Current Balance</div>
+                    </div>
+                    <div class="salary-item">
+                        <div class="salary-value" id="monthly-income">₽0</div>
+                        <div class="salary-label">Monthly Income</div>
+                    </div>
+                    <div class="salary-item">
+                        <div class="salary-value" id="total-expenses">₽0</div>
+                        <div class="salary-label">Total Expenses</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress" id="salary-progress" style="width: 0%"></div>
+                </div>
+                <p>Monthly budget usage: <span id="budget-usage">0%</span></p>
+                
+                <div class="shift-info">
+                    <div class="shift-summary">
+                        <div class="shift-value" id="shifts-worked">0</div>
+                        <div class="salary-label">Shifts Worked</div>
+                    </div>
+                    <div class="shift-summary">
+                        <div class="shift-value" id="shift-cost">₽0</div>
+                        <div class="salary-label">Shift Cost</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h2>Quick Actions</h2>
+                <div class="form-group">
+                    <button class="btn btn-primary" id="add-task-btn">Add New Task</button>
+                    <button class="btn btn-success" id="add-expense-btn">Add Expense</button>
+                    <button class="btn btn-primary" id="add-note-btn">Add Note</button>
+                </div>
+                <div class="form-group">
+                    <label for="salary-input">Update Monthly Salary</label>
+                    <input type="number" id="salary-input" placeholder="Enter amount (can be negative)">
+                    <div class="salary-controls">
+                        <button class="btn btn-primary" id="add-salary-btn">Add Amount</button>
+                        <button class="btn btn-danger" id="subtract-salary-btn">Subtract Amount</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="shift-cost-input">Shift Cost</label>
+                    <input type="number" id="shift-cost-input" placeholder="Cost per shift">
+                    <button class="btn btn-primary" id="update-shift-cost-btn" style="margin-top: 10px; width: 100%;">Update</button>
+                </div>
+                <div class="form-group">
+                    <label>Manage Shifts</label>
+                    <div class="shift-controls">
+                        <button class="btn btn-success" id="add-shift-btn">+1 Shift</button>
+                        <button class="btn btn-danger" id="remove-shift-btn">-1 Shift</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="tasks">Tasks</div>
+            <div class="tab" data-tab="expenses">Expenses</div>
+            <div class="tab" data-tab="notes">Notes</div>
+            <div class="tab" data-tab="salary">Salary Details</div>
+        </div>
+        
+        <div class="tab-content active" id="tasks-tab">
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div class="tasks-header">
+                    <div class="greeting" id="time-greeting">Good evening, Mahmoud</div>
+                    <div class="time-left" id="time-left">7 hours left in the day. Use them wisely!</div>
+                    
+                    <div class="progress-container">
+                        <div class="progress-percent" id="task-progress-percent">30%</div>
+                        <div class="progress-text" id="task-progress-text">You've completed 0 out of 0 tasks.</div>
+                        <div class="progress-bar-task">
+                            <div class="progress-fill" id="task-progress-fill"></div>
+                        </div>
+                        <div class="progress-text">You're making good progress.</div>
+                    </div>
+                    
+                    <div class="search-container">
+                        <i class=""></i>
+                        <input type="text" id="task-search" placeholder="                                                                                                 الوقت كالسيف ان لم تقطعه قطعك">
+                    </div>
+                </div>
+                
+                <div style="padding: 0 20px;">
+                    <div class="task-form" id="task-form" style="display: none;">
+                        <h3>Create New Task</h3>
+                        <div class="form-group">
+                            <label for="task-title">Task Title</label>
+                            <input type="text" id="task-title" placeholder="Enter task title">
+                        </div>
+                        <div class="form-group">
+                            <label for="task-description">Description (Optional)</label>
+                            <textarea id="task-description" placeholder="Enter task description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-category-input">Category</label>
+                            <select id="task-category-input">
+                                <option value="work">Work</option>
+                                <option value="coding">Coding</option>
+                                <option value="personal">Personal</option>
+                                <option value="shopping">Shopping</option>
+                                <option value="health">Health/Fitness</option>
+                                <option value="home">Home</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-deadline-input">Deadline (Optional)</label>
+                            <input type="date" id="task-deadline-input">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="task-pinned-input"> Pin this task
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="save-task-btn">Save Task</button>
+                            <button class="btn btn-danger" id="cancel-task-btn">Cancel</button>
+                        </div>
+                    </div>
+                    
+         
+                    
+                    <div class="section-title">
+                        <h3>+ Pinned</h3>
+                    </div>
+                    
+                    <div id="pinned-tasks-list">
+                        <!-- Pinned tasks will appear here -->
+                    </div>
+                    
+                    <div class="section-title">
+                        <h3>Today</h3>
+                    </div>
+                    
+                    <div id="today-tasks-list">
+                        <!-- Today's tasks will appear here -->
+                    </div>
+                    
+                    <div class="section-title">
+                        <h3>Upcoming</h3>
+                    </div>
+                    
+                    <div id="upcoming-tasks-list">
+                        <!-- Upcoming tasks will appear here -->
+                    </div>
+                    
+                    <div class="completed-section">
+                        <div class="section-title">
+                            <h3>Completed Tasks</h3>
+                        </div>
+                        
+                        <div id="completed-tasks-list">
+                            <!-- Completed tasks will appear here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="expenses-tab">
+            <div class="card">
+                <h2>Expense Tracker - <span id="expense-month"></span></h2>
+                <div class="form-group">
+                    <label for="expense-name">Expense Name</label>
+                    <input type="text" id="expense-name" placeholder="e.g., Groceries, Rent, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="expense-amount">Amount</label>
+                    <input type="number" id="expense-amount" placeholder="Enter amount">
+                </div>
+                <div class="form-group">
+                    <label for="expense-category">Category</label>
+                    <select id="expense-category">
+                        <option value="rent">Rent</option>
+                        <option value="food">Food</option>
+                        <option value="transport">Transport</option>
+                        <option value="internet">Internet</option>
+                        <option value="haircut">Haircut</option>
+                        <option value="entertainment">Entertainment</option>
+                        <option value="health">Health</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" id="add-expense">Add Expense</button>
+                
+                <div class="expense-list" id="expense-list">
+                    <!-- Expenses will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="notes-tab">
+            <div class="card">
+                <h2>Personal Notes</h2>
+                <div class="form-group">
+                    <label for="note-title">Title</label>
+                    <input type="text" id="note-title" placeholder="Note title">
+                </div>
+                <div class="form-group">
+                    <label for="note-content">Content</label>
+                    <textarea id="note-content" placeholder="Write your note here..."></textarea>
+                </div>
+                <button class="btn btn-primary" id="add-note">Add Note</button>
+                
+                <div class="notes-list" id="notes-list">
+                    <!-- Notes will be added here dynamically -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="salary-tab">
+            <div class="card">
+                <h2>Salary Details - <span id="salary-month"></span></h2>
+                <button class="download-btn" id="download-excel">
+                    <i class="fas fa-file-excel"></i> Download Monthly Salary Details (Excel)
+                </button>
+                
+                <div class="form-group">
+                    <h3>Expense Categories</h3>
+                    <div class="expense-categories" id="expense-categories">
+                        <!-- Expense categories will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <h3>Recent Expenses</h3>
+                    <div class="expense-list" id="recent-expenses">
+                        <!-- Recent expenses will be added here dynamically -->
+                    </div>
+                </div>
+                
+                <div class="monthly-history">
+                    <h3>Monthly History</h3>
+                    <div id="monthly-history-list">
+                        <!-- Monthly history will be added here dynamically -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- NEW: Floating Action Button for Adding Tasks -->
+        <div class="fab" id="fab-add-task">
+            <i class="fas fa-plus"></i>
+        </div>
+        
+        <!-- NEW: Task Details Modal -->
+        <div class="task-details-modal" id="task-details-modal">
+            <div class="task-details-content">
+                <div class="task-details-header">
+                    <h2 class="task-details-title" id="task-details-title">Task Details</h2>
+                    <button class="task-details-close" id="task-details-close">&times;</button>
+                </div>
+                <div class="task-details-body">
+                    <div class="task-details-description" id="task-details-description">
+                        No description available.
+                    </div>
+                    <div class="task-details-meta">
+                        <div class="task-details-meta-item">
+                            <i class="fas fa-tag"></i>
+                            <span id="task-details-category">Category</span>
+                        </div>
+                        <div class="task-details-meta-item">
+                            <i class="far fa-calendar"></i>
+                            <span id="task-details-deadline">No deadline</span>
+                        </div>
+                        <div class="task-details-meta-item">
+                            <i class="fas fa-thumbtack"></i>
+                            <span id="task-details-pinned">Not pinned</span>
+                        </div>
+                        <div class="task-details-meta-item">
+                            <i class="far fa-check-circle"></i>
+                            <span id="task-details-status">Status</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="task-details-actions">
+                    <button class="task-details-action-btn task-details-complete" id="task-details-complete">
+                        <i class="far fa-check-circle"></i> Mark as Done
+                    </button>
+                    <button class="task-details-action-btn task-details-pin" id="task-details-pin">
+                        <i class="fas fa-thumbtack"></i> Pin/Unpin
+                    </button>
+                    <button class="task-details-action-btn task-details-edit" id="task-details-edit">
+                        <i class="far fa-edit"></i> Edit
+                    </button>
+                    <button class="task-details-action-btn task-details-delete" id="task-details-delete">
+                        <i class="far fa-trash-alt"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize data with localStorage
+        let monthlyData = JSON.parse(localStorage.getItem('iManager_monthlyData')) || {};
+        let notes = JSON.parse(localStorage.getItem('iManager_notes')) || [];
+        let currentMonth = getCurrentMonthKey();
+        
+        // Initialize current month if it doesn't exist
+        if (!monthlyData[currentMonth]) {
+            monthlyData[currentMonth] = {
+                tasks: [],
+                expenses: [],
+                monthlySalary: 0,
+                shiftCost: 0,
+                shiftsWorked: 0
+            };
+            saveData();
+        }
+
+        // DOM Elements
+        const currentDateEl = document.getElementById('current-date');
+        const currentMonthEl = document.getElementById('current-month');
+        const expenseMonthEl = document.getElementById('expense-month');
+        const salaryMonthEl = document.getElementById('salary-month');
+        const currentBalanceEl = document.getElementById('current-balance');
+        const monthlyIncomeEl = document.getElementById('monthly-income');
+        const totalExpensesEl = document.getElementById('total-expenses');
+        const salaryProgressEl = document.getElementById('salary-progress');
+        const budgetUsageEl = document.getElementById('budget-usage');
+        const shiftsWorkedEl = document.getElementById('shifts-worked');
+        const shiftCostEl = document.getElementById('shift-cost');
+        const expenseListEl = document.getElementById('expense-list');
+        const notesListEl = document.getElementById('notes-list');
+        const expenseCategoriesEl = document.getElementById('expense-categories');
+        const recentExpensesEl = document.getElementById('recent-expenses');
+        const monthlyHistoryEl = document.getElementById('monthly-history-list');
+        const monthSelectEl = document.getElementById('month-select');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Task-related DOM elements
+        const pinnedTasksListEl = document.getElementById('pinned-tasks-list');
+        const todayTasksListEl = document.getElementById('today-tasks-list');
+        const upcomingTasksListEl = document.getElementById('upcoming-tasks-list');
+        const completedTasksListEl = document.getElementById('completed-tasks-list');
+        const taskFormEl = document.getElementById('task-form');
+        const taskTitleInput = document.getElementById('task-title');
+        const taskDescriptionInput = document.getElementById('task-description');
+        const taskCategoryInput = document.getElementById('task-category-input');
+        const taskDeadlineInput = document.getElementById('task-deadline-input');
+        const taskPinnedInput = document.getElementById('task-pinned-input');
+        const saveTaskBtn = document.getElementById('save-task-btn');
+        const cancelTaskBtn = document.getElementById('cancel-task-btn');
+
+        // NEW: Task-related DOM elements
+        const fabAddTaskEl = document.getElementById('fab-add-task');
+        const taskDetailsModalEl = document.getElementById('task-details-modal');
+        const taskDetailsCloseEl = document.getElementById('task-details-close');
+        const taskDetailsTitleEl = document.getElementById('task-details-title');
+        const taskDetailsDescriptionEl = document.getElementById('task-details-description');
+        const taskDetailsCategoryEl = document.getElementById('task-details-category');
+        const taskDetailsDeadlineEl = document.getElementById('task-details-deadline');
+        const taskDetailsPinnedEl = document.getElementById('task-details-pinned');
+        const taskDetailsStatusEl = document.getElementById('task-details-status');
+        const taskDetailsCompleteEl = document.getElementById('task-details-complete');
+        const taskDetailsPinEl = document.getElementById('task-details-pin');
+        const taskDetailsEditEl = document.getElementById('task-details-edit');
+        const taskDetailsDeleteEl = document.getElementById('task-details-delete');
+        
+        // Variable to track the currently selected task
+        let currentTaskId = null;
+
+        // Category icons mapping
+        const categoryIcons = {
+            'rent': 'fa-home',
+            'food': 'fa-utensils',
+            'transport': 'fa-car',
+            'internet': 'fa-wifi',
+            'haircut': 'fa-cut',
+            'entertainment': 'fa-film',
+            'health': 'fa-heartbeat',
+            'other': 'fa-receipt'
+        };
+
+        // Task category colors
+        const taskCategoryColors = {
+            'work': '#4361ee',
+            'personal': '#f72585',
+            'shopping': '#4cc9f0',
+            'health': '#f8961e',
+            'other': '#6c757d',
+            'coding': '#4361ee',
+            'home': '#4cc9f0',
+            'health/fitness': '#f8961e'
+        };
+
+        // Helper functions
+        function getCurrentMonthKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+        
+        function formatMonthKey(key) {
+            const [year, month] = key.split('-');
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                'July', 'August', 'September', 'October', 'November', 'December'];
+            return `${monthNames[parseInt(month) - 1]} ${year}`;
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date
+            const now = new Date();
+            currentDateEl.textContent = now.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            // Update month displays
+            currentMonthEl.textContent = formatMonthKey(currentMonth);
+            expenseMonthEl.textContent = formatMonthKey(currentMonth);
+            salaryMonthEl.textContent = formatMonthKey(currentMonth);
+            
+            // Populate month selector
+            populateMonthSelector();
+            
+            // Update salary display
+            updateSalaryDisplay();
+            
+            // Render all data
+            renderTasks();
+            renderExpenses();
+            renderNotes();
+            renderExpenseCategories();
+            renderRecentExpenses();
+            renderMonthlyHistory();
+            
+            // Set up event listeners
+            setupEventListeners();
+        });
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Add task button
+            document.getElementById('add-task-btn').addEventListener('click', function() {
+                switchTab('tasks');
+                showTaskForm();
+            });
+            
+            // Save task
+            saveTaskBtn.addEventListener('click', saveTask);
+            
+            // Cancel task creation
+            cancelTaskBtn.addEventListener('click', hideTaskForm);
+            
+            // Add expense
+            document.getElementById('add-expense').addEventListener('click', addExpense);
+            
+            // Add note
+            document.getElementById('add-note').addEventListener('click', addNote);
+            
+            // Update salary
+            document.getElementById('add-salary-btn').addEventListener('click', function() {
+                updateSalary('add');
+            });
+            document.getElementById('subtract-salary-btn').addEventListener('click', function() {
+                updateSalary('subtract');
+            });
+            
+            // Update shift cost
+            document.getElementById('update-shift-cost-btn').addEventListener('click', updateShiftCost);
+            
+            // Add/remove shift worked
+            document.getElementById('add-shift-btn').addEventListener('click', function() {
+                updateShiftsWorked(1);
+            });
+            document.getElementById('remove-shift-btn').addEventListener('click', function() {
+                updateShiftsWorked(-1);
+            });
+            
+            // Quick action buttons
+            document.getElementById('add-expense-btn').addEventListener('click', function() {
+                switchTab('expenses');
+                document.getElementById('expense-name').focus();
+            });
+            
+            document.getElementById('add-note-btn').addEventListener('click', function() {
+                switchTab('notes');
+                document.getElementById('note-title').focus();
+            });
+            
+            // Month selector
+            monthSelectEl.addEventListener('change', changeMonth);
+            document.getElementById('new-month-btn').addEventListener('click', startNewMonth);
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    switchTab(tabId);
+                });
+            });
+
+            // Task search
+            document.getElementById('task-search').addEventListener('input', function(e) {
+                // Implement search filtering here if needed
+            });
+            
+            // Category filter chips
+            document.querySelectorAll('.category-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    document.querySelectorAll('.category-chip').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    // Implement category filtering here if needed
+                });
+            });
+            
+            // Download Excel button
+            document.getElementById('download-excel').addEventListener('click', downloadSalaryExcel);
+            
+            // NEW: FAB Add Task button
+            fabAddTaskEl.addEventListener('click', function() {
+                switchTab('tasks');
+                showTaskForm();
+            });
+            
+            // NEW: Task details modal close button
+            taskDetailsCloseEl.addEventListener('click', closeTaskDetails);
+            
+            // NEW: Task details action buttons
+            taskDetailsCompleteEl.addEventListener('click', function() {
+                if (currentTaskId) {
+                    toggleTask(currentTaskId);
+                    closeTaskDetails();
+                }
+            });
+            
+            taskDetailsPinEl.addEventListener('click', function() {
+                if (currentTaskId) {
+                    togglePinTask(currentTaskId);
+                    closeTaskDetails();
+                }
+            });
+            
+            taskDetailsEditEl.addEventListener('click', function() {
+                if (currentTaskId) {
+                    editTask(currentTaskId);
+                    closeTaskDetails();
+                }
+            });
+            
+            taskDetailsDeleteEl.addEventListener('click', function() {
+                if (currentTaskId) {
+                    deleteTask(currentTaskId);
+                    closeTaskDetails();
+                }
+            });
+            
+            // NEW: Close modal when clicking outside
+            taskDetailsModalEl.addEventListener('click', function(e) {
+                if (e.target === taskDetailsModalEl) {
+                    closeTaskDetails();
+                }
+            });
+        }
+
+        // NEW: Function to open task details
+        function openTaskDetails(taskId) {
+            const task = monthlyData[currentMonth].tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            currentTaskId = taskId;
+            
+            // Update modal content
+            taskDetailsTitleEl.textContent = task.text;
+            taskDetailsDescriptionEl.textContent = task.description || 'No description available.';
+            taskDetailsCategoryEl.textContent = task.category.charAt(0).toUpperCase() + task.category.slice(1);
+            
+            if (task.deadline) {
+                const deadlineDate = new Date(task.deadline);
+                taskDetailsDeadlineEl.textContent = deadlineDate.toLocaleDateString('en-GB');
+            } else {
+                taskDetailsDeadlineEl.textContent = 'No deadline';
+            }
+            
+            taskDetailsPinnedEl.textContent = task.pinned ? 'Pinned' : 'Not pinned';
+            taskDetailsStatusEl.textContent = task.completed ? 'Completed' : 'Incomplete';
+            
+            // Update button text based on task status
+            taskDetailsCompleteEl.innerHTML = task.completed ? 
+                '<i class="fas fa-redo"></i> Reopen' : 
+                '<i class="far fa-check-circle"></i> Mark as Done';
+            
+            taskDetailsPinEl.innerHTML = task.pinned ? 
+                '<i class="fas fa-thumbtack"></i> Unpin' : 
+                '<i class="fas fa-thumbtack"></i> Pin';
+            
+            // Show modal
+            taskDetailsModalEl.style.display = 'flex';
+        }
+
+        // NEW: Function to close task details
+        function closeTaskDetails() {
+            taskDetailsModalEl.style.display = 'none';
+            currentTaskId = null;
+        }
+
+        // Task form functions
+        function showTaskForm() {
+            taskFormEl.style.display = 'block';
+            // Set today's date as default for deadline
+            const today = new Date().toISOString().split('T')[0];
+            taskDeadlineInput.value = today;
+            taskTitleInput.focus();
+        }
+        
+        function hideTaskForm() {
+            taskFormEl.style.display = 'none';
+            // Reset form
+            taskTitleInput.value = '';
+            taskDescriptionInput.value = '';
+            taskCategoryInput.value = 'work';
+            taskDeadlineInput.value = '';
+            taskPinnedInput.checked = false;
+        }
+        
+        function saveTask() {
+            const title = taskTitleInput.value.trim();
+            const description = taskDescriptionInput.value.trim();
+            const category = taskCategoryInput.value;
+            const deadline = taskDeadlineInput.value;
+            const pinned = taskPinnedInput.checked;
+            
+            if (title) {
+                const task = {
+                    id: Date.now(),
+                    text: title,
+                    description: description,
+                    category: category,
+                    deadline: deadline,
+                    pinned: pinned,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                
+                monthlyData[currentMonth].tasks.push(task);
+                saveData();
+                renderTasks();
+                hideTaskForm();
+            } else {
+                alert('Please enter a task title');
+            }
+        }
+
+        // Tab switching function
+        function switchTab(tabId) {
+            // Remove active class from all tabs and contents
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+            
+            // Add active class to selected tab and content
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        }
+
+        // Populate month selector
+        function populateMonthSelector() {
+            monthSelectEl.innerHTML = '';
+            
+            const months = Object.keys(monthlyData).sort().reverse();
+            
+            months.forEach(month => {
+                const option = document.createElement('option');
+                option.value = month;
+                option.textContent = formatMonthKey(month);
+                if (month === currentMonth) {
+                    option.selected = true;
+                }
+                monthSelectEl.appendChild(option);
+            });
+        }
+
+        // Change current month
+        function changeMonth() {
+            currentMonth = monthSelectEl.value;
+            currentMonthEl.textContent = formatMonthKey(currentMonth);
+            expenseMonthEl.textContent = formatMonthKey(currentMonth);
+            salaryMonthEl.textContent = formatMonthKey(currentMonth);
+            
+            updateSalaryDisplay();
+            renderTasks();
+            renderExpenses();
+            renderExpenseCategories();
+            renderRecentExpenses();
+        }
+
+        // Start a new month
+        function startNewMonth() {
+            const now = new Date();
+            const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const nextMonthKey = `${nextMonth.getFullYear()}-${String(nextMonth.getMonth() + 1).padStart(2, '0')}`;
+            
+            if (!monthlyData[nextMonthKey]) {
+                monthlyData[nextMonthKey] = {
+                    tasks: [],
+                    expenses: [],
+                    monthlySalary: monthlyData[currentMonth].monthlySalary,
+                    shiftCost: monthlyData[currentMonth].shiftCost,
+                    shiftsWorked: 0
+                };
+                saveData();
+                
+                currentMonth = nextMonthKey;
+                populateMonthSelector();
+                changeMonth();
+            } else {
+                alert('Next month already exists!');
+            }
+        }
+
+        // Update salary display
+        function updateSalaryDisplay() {
+            const data = monthlyData[currentMonth];
+            
+            // Calculate income from shifts if shift cost is set
+            const incomeFromShifts = data.shiftCost * data.shiftsWorked;
+            const totalIncome = data.monthlySalary + incomeFromShifts;
+            
+            monthlyIncomeEl.textContent = `₽${totalIncome.toLocaleString()}`;
+            
+            const totalExpenses = data.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+            totalExpensesEl.textContent = `₽${totalExpenses.toLocaleString()}`;
+            
+            const currentBalance = totalIncome - totalExpenses;
+            currentBalanceEl.textContent = `₽${currentBalance.toLocaleString()}`;
+            
+            // Update shift information
+            shiftsWorkedEl.textContent = data.shiftsWorked;
+            shiftCostEl.textContent = `₽${data.shiftCost.toLocaleString()}`;
+            
+            // Update progress bar
+            if (totalIncome > 0) {
+                const usagePercentage = (totalExpenses / totalIncome) * 100;
+                salaryProgressEl.style.width = `${Math.min(usagePercentage, 100)}%`;
+                budgetUsageEl.textContent = `${usagePercentage.toFixed(1)}%`;
+                
+                // Change color based on usage
+                if (usagePercentage > 90) {
+                    salaryProgressEl.style.backgroundColor = 'var(--danger)';
+                } else if (usagePercentage > 70) {
+                    salaryProgressEl.style.backgroundColor = 'var(--warning)';
+                } else {
+                    salaryProgressEl.style.backgroundColor = 'var(--success)';
+                }
+            } else {
+                salaryProgressEl.style.width = '0%';
+                budgetUsageEl.textContent = '0%';
+            }
+        }
+
+        // Task functions
+          function updateTaskProgress() {
+        const data = monthlyData[currentMonth];
+        const totalTasks = data.tasks.length;
+        const completedTasks = data.tasks.filter(task => task.completed).length;
+        
+        if (totalTasks > 0) {
+            const progressPercent = Math.round((completedTasks / totalTasks) * 100);
+            document.getElementById('task-progress-percent').textContent = `${progressPercent}%`;
+            document.getElementById('task-progress-text').textContent = 
+                `You've completed ${completedTasks} out of ${totalTasks} tasks.`;
+            document.getElementById('task-progress-fill').style.width = `${progressPercent}%`;
+            
+            // Update greeting based on time of day
+            updateGreeting();
+        } else {
+            document.getElementById('task-progress-percent').textContent = `0%`;
+            document.getElementById('task-progress-text').textContent = 
+                `You have no tasks yet. Add your first task!`;
+            document.getElementById('task-progress-fill').style.width = `0%`;
+        }
+    }
+    
+    function updateGreeting() {
+        const now = new Date();
+        const hour = now.getHours();
+        let greeting = "Good evening";
+        
+        if (hour < 12) greeting = "Good morning";
+        else if (hour < 18) greeting = "Good afternoon";
+        
+        document.getElementById('time-greeting').textContent = `${greeting}, Mahmoud`;
+        
+        // Calculate hours left in the day
+        const hoursLeft = 24 - hour;
+        document.getElementById('time-left').textContent = 
+            `${hoursLeft} hours left in the day. Use them wisely!`;
+    }
+    
+    // Render tasks in the new design
+    function renderTasks() {
+        const data = monthlyData[currentMonth];
+        
+        const pinnedTasks = data.tasks.filter(task => task.pinned && !task.completed);
+        const todayTasks = data.tasks.filter(task => !task.pinned && !task.completed && isToday(task.deadline));
+        const upcomingTasks = data.tasks.filter(task => !task.pinned && !task.completed && !isToday(task.deadline) && task.deadline);
+        const completedTasks = data.tasks.filter(task => task.completed);
+        
+        // Render pinned tasks
+        pinnedTasksListEl.innerHTML = '';
+        
+        if (pinnedTasks.length === 0) {
+            pinnedTasksListEl.innerHTML = '<div class="empty-state"><i class="fas fa-thumbtack"></i><p>No pinned tasks</p></div>';
+        } else {
+            pinnedTasks.forEach(task => {
+                const taskEl = createNewTaskElement(task);
+                pinnedTasksListEl.appendChild(taskEl);
+            });
+        }
+        
+        // Render today's tasks
+        todayTasksListEl.innerHTML = '';
+        
+        if (todayTasks.length === 0) {
+            todayTasksListEl.innerHTML = '<div class="empty-state"><i class="far fa-calendar"></i><p>No tasks for today</p></div>';
+        } else {
+            todayTasks.forEach(task => {
+                const taskEl = createNewTaskElement(task);
+                todayTasksListEl.appendChild(taskEl);
+            });
+        }
+        
+        // Render upcoming tasks
+        upcomingTasksListEl.innerHTML = '';
+        
+        if (upcomingTasks.length === 0) {
+            upcomingTasksListEl.innerHTML = '<div class="empty-state"><i class="far fa-check-circle"></i><p>No upcoming tasks. Add a new task to get started!</p></div>';
+        } else {
+            upcomingTasks.forEach(task => {
+                const taskEl = createNewTaskElement(task);
+                upcomingTasksListEl.appendChild(taskEl);
+            });
+        }
+        
+        // Render completed tasks
+        completedTasksListEl.innerHTML = '';
+        
+        if (completedTasks.length === 0) {
+            completedTasksListEl.innerHTML = '<div class="empty-state"><i class="far fa-check-circle"></i><p>No completed tasks yet</p></div>';
+        } else {
+            completedTasks.forEach(task => {
+                const taskEl = createNewTaskElement(task);
+                completedTasksListEl.appendChild(taskEl);
+            });
+        }
+        
+        // Update task progress
+        updateTaskProgress();
+    }
+    
+    function createNewTaskElement(task) {
+        const div = document.createElement('div');
+        div.className = `task-item ${task.completed ? 'completed-task task-completed' : ''} ${task.pinned ? 'pinned task-pinned' : ''}`;
+        
+        // Add click event to open task details
+        div.addEventListener('click', function(e) {
+            // Don't open details if clicking on action buttons
+            if (!e.target.closest('.task-buttons')) {
+                openTaskDetails(task.id);
+            }
+        });
+        
+        // Format deadline if exists
+        let deadlineHtml = '';
+        if (task.deadline) {
+            const deadlineDate = new Date(task.deadline);
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            let dateText = deadlineDate.toLocaleDateString('en-GB');
+            if (isToday(deadlineDate)) {
+                dateText = 'Today';
+            } else if (isTomorrow(deadlineDate)) {
+                dateText = 'Tomorrow';
+            }
+            
+            deadlineHtml = `<div class="task-date"><i class="far fa-clock"></i> ${dateText}</div>`;
+        }
+        
+        // Create category tags
+        const categoryName = task.category.charAt(0).toUpperCase() + task.category.slice(1);
+        const categoryColor = taskCategoryColors[task.category] || taskCategoryColors['other'];
+        const categoryHtml = `<span class="task-category" style="background-color: ${categoryColor}; color: white;">${categoryName}</span>`;
+        
+        // Create status text
+        let statusHtml = '';
+        if (task.completed) {
+            statusHtml = '<i class="fas fa-check-circle"></i> Completed';
+        } else {
+            statusHtml = '<i class="far fa-check-circle"></i> Not completed';
+        }
+        
+        // Create action buttons
+        let actionButtons = '';
+        if (task.completed) {
+            actionButtons = `
+                <button class="task-btn" onclick="event.stopPropagation(); reopenTask(${task.id})">
+                    <i class="fas fa-redo"></i> Reopen
+                </button>
+            `;
+        } else {
+            actionButtons = `
+                <button class="task-btn" onclick="event.stopPropagation(); editTask(${task.id})">
+                    <i class="far fa-edit"></i> Edit
+                </button>
+                <button class="task-btn" onclick="event.stopPropagation(); togglePinTask(${task.id})">
+                    <i class="fas fa-thumbtack"></i> ${task.pinned ? 'Unpin' : 'Pin'}
+                </button>
+            `;
+        }
+        
+        // Add pinned badge if needed
+        const pinnedBadge = task.pinned ? 
+            `<div class="pinned-badge"><i class="fas fa-thumbtack"></i> Pinned</div>` : '';
+        
+        div.innerHTML = `
+            ${pinnedBadge}
+            <div class="task-header">
+                <div class="task-title">${task.text}</div>
+            </div>
+            ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+            <div class="task-meta">
+                ${deadlineHtml}
+                ${categoryHtml}
+            </div>
+            <div class="task-actions">
+                <div class="task-status">
+                    ${statusHtml}
+                </div>
+                <div class="task-buttons">
+                    ${actionButtons}
+                    <button class="task-btn" onclick="event.stopPropagation(); deleteTask(${task.id})">
+                        <i class="far fa-trash-alt"></i> Delete
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        return div;
+    }
+    
+    function isToday(date) {
+        if (!date) return false;
+        const checkDate = new Date(date);
+        const today = new Date();
+        return checkDate.toDateString() === today.toDateString();
+    }
+    
+    function isTomorrow(date) {
+        if (!date) return false;
+        const checkDate = new Date(date);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        return checkDate.toDateString() === tomorrow.toDateString();
+    }
+    
+    // Task action functions
+    function toggleTask(id) {
+        monthlyData[currentMonth].tasks = monthlyData[currentMonth].tasks.map(task => {
+            if (task.id === id) {
+                task.completed = !task.completed;
+            }
+            return task;
+        });
+        
+        saveData();
+        renderTasks();
+    }
+
+    function reopenTask(id) {
+        toggleTask(id);
+    }
+
+    function deleteTask(id) {
+        monthlyData[currentMonth].tasks = monthlyData[currentMonth].tasks.filter(task => task.id !== id);
+        saveData();
+        renderTasks();
+    }
+
+    function editTask(id) {
+        const task = monthlyData[currentMonth].tasks.find(t => t.id === id);
+        if (!task) return;
+        
+        // Pre-fill the task form with current values
+        taskTitleInput.value = task.text;
+        taskDescriptionInput.value = task.description || '';
+        taskCategoryInput.value = task.category;
+        taskDeadlineInput.value = task.deadline || '';
+        taskPinnedInput.checked = task.pinned;
+        
+        // Show the form
+        showTaskForm();
+        
+        // Update save button to edit instead of create
+        saveTaskBtn.textContent = 'Update Task';
+        saveTaskBtn.onclick = function() {
+            updateTask(id);
+        };
+        
+        // Update cancel button to reset to create mode
+        cancelTaskBtn.onclick = function() {
+            hideTaskForm();
+            saveTaskBtn.textContent = 'Save Task';
+            saveTaskBtn.onclick = saveTask;
+        };
+    }
+
+    // Function to update an existing task
+    function updateTask(id) {
+        const title = taskTitleInput.value.trim();
+        const description = taskDescriptionInput.value.trim();
+        const category = taskCategoryInput.value;
+        const deadline = taskDeadlineInput.value;
+        const pinned = taskPinnedInput.checked;
+        
+        if (title) {
+            monthlyData[currentMonth].tasks = monthlyData[currentMonth].tasks.map(task => {
+                if (task.id === id) {
+                    task.text = title;
+                    task.description = description;
+                    task.category = category;
+                    task.deadline = deadline;
+                    task.pinned = pinned;
+                }
+                return task;
+            });
+            
+            saveData();
+            renderTasks();
+            hideTaskForm();
+            
+            // Reset save button to create mode
+            saveTaskBtn.textContent = 'Save Task';
+            saveTaskBtn.onclick = saveTask;
+        } else {
+            alert('Please enter a task title');
+        }
+    }
+
+    function togglePinTask(id) {
+        monthlyData[currentMonth].tasks = monthlyData[currentMonth].tasks.map(task => {
+            if (task.id === id) {
+                task.pinned = !task.pinned;
+            }
+            return task;
+        });
+        
+        saveData();
+        renderTasks();
+    }
+
+
+        // Expense functions
+        function addExpense() {
+            const nameInput = document.getElementById('expense-name');
+            const amountInput = document.getElementById('expense-amount');
+            const categorySelect = document.getElementById('expense-category');
+            
+            const name = nameInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            const category = categorySelect.value;
+            
+            if (name && amount > 0) {
+                const expense = {
+                    id: Date.now(),
+                    name: name,
+                    amount: amount,
+                    category: category,
+                    date: new Date().toISOString()
+                };
+                
+                monthlyData[currentMonth].expenses.push(expense);
+                saveData();
+                renderExpenses();
+                renderExpenseCategories();
+                renderRecentExpenses();
+                updateSalaryDisplay();
+                
+                // Reset form
+                nameInput.value = '';
+                amountInput.value = '';
+                categorySelect.value = 'food';
+            }
+        }
+
+        function deleteExpense(id) {
+            monthlyData[currentMonth].expenses = monthlyData[currentMonth].expenses.filter(expense => expense.id !== id);
+            saveData();
+            renderExpenses();
+            renderExpenseCategories();
+            renderRecentExpenses();
+            updateSalaryDisplay();
+        }
+
+        function renderExpenses() {
+            expenseListEl.innerHTML = '';
+            const data = monthlyData[currentMonth];
+            
+            if (data.expenses.length === 0) {
+                expenseListEl.innerHTML = '<p>No expenses recorded yet.</p>';
+                return;
+            }
+            
+            // Show only last 10 expenses in the expense tab
+            const recentExpenses = [...data.expenses].reverse().slice(0, 10);
+            
+            recentExpenses.forEach(expense => {
+                const div = document.createElement('div');
+                div.className = 'expense-item';
+                
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <div class="expense-icon">
+                            <i class="fas ${categoryIcons[expense.category]}"></i>
+                        </div>
+                        <div>
+                            <strong>${expense.name}</strong>
+                            <br>
+                            <small>${expense.category} • ${new Date(expense.date).toLocaleDateString()}</small>
+                        </div>
+                    </div>
+                    <div class="expense-amount">₽${expense.amount.toLocaleString()}</div>
+                    <button class="btn btn-danger" onclick="deleteExpense(${expense.id})">Delete</button>
+                `;
+                
+                expenseListEl.appendChild(div);
+            });
+        }
+
+        function renderExpenseCategories() {
+            expenseCategoriesEl.innerHTML = '';
+            const data = monthlyData[currentMonth];
+            
+            // Calculate total by category
+            const categories = {};
+            data.expenses.forEach(expense => {
+                if (!categories[expense.category]) {
+                    categories[expense.category] = 0;
+                }
+                categories[expense.category] += expense.amount;
+            });
+            
+            // Create category items
+            Object.keys(categories).forEach(category => {
+                const div = document.createElement('div');
+                div.className = 'category-item';
+                
+                div.innerHTML = `
+                    <div class="category-icon">
+                        <i class="fas ${categoryIcons[category]}"></i>
+                    </div>
+                    <div class="category-name">${category.charAt(0).toUpperCase() + category.slice(1)}</div>
+                    <div class="category-amount">₽${categories[category].toLocaleString()}</div>
+                `;
+                
+                expenseCategoriesEl.appendChild(div);
+            });
+        }
+
+        function renderRecentExpenses() {
+            recentExpensesEl.innerHTML = '';
+            const data = monthlyData[currentMonth];
+            
+            if (data.expenses.length === 0) {
+                recentExpensesEl.innerHTML = '<p>No expenses recorded yet.</p>';
+                return;
+            }
+            
+            // Show only last 5 expenses in the salary tab
+            const recentExpenses = [...data.expenses].reverse().slice(0, 5);
+            
+            recentExpenses.forEach(expense => {
+                const div = document.createElement('div');
+                div.className = 'expense-item';
+                
+                div.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <div class="expense-icon">
+                            <i class="fas ${categoryIcons[expense.category]}"></i>
+                        </div>
+                        <div>
+                            <strong>${expense.name}</strong>
+                            <br>
+                            <small>${expense.category} • ${new Date(expense.date).toLocaleDateString()}</small>
+                        </div>
+                    </div>
+                    <div class="expense-amount">₽${expense.amount.toLocaleString()}</div>
+                `;
+                
+                recentExpensesEl.appendChild(div);
+            });
+        }
+
+        // Note functions
+        function addNote() {
+            const titleInput = document.getElementById('note-title');
+            const contentInput = document.getElementById('note-content');
+            
+            const title = titleInput.value.trim();
+            const content = contentInput.value.trim();
+            
+            if (title && content) {
+                const note = {
+                    id: Date.now(),
+                    title: title,
+                    content: content,
+                    date: new Date().toISOString()
+                };
+                
+                notes.push(note);
+                saveData();
+                renderNotes();
+                
+                // Reset form
+                titleInput.value = '';
+                contentInput.value = '';
+            }
+        }
+
+        function deleteNote(id) {
+            notes = notes.filter(note => note.id !== id);
+            saveData();
+            renderNotes();
+        }
+
+        function renderNotes() {
+            notesListEl.innerHTML = '';
+            
+            if (notes.length === 0) {
+                notesListEl.innerHTML = '<p>No notes yet. Add your first note!</p>';
+                return;
+            }
+            
+            // Show notes in reverse chronological order
+            const sortedNotes = [...notes].reverse();
+            
+            sortedNotes.forEach(note => {
+                const div = document.createElement('div');
+                div.className = 'note-item';
+                
+                div.innerHTML = `
+                    <div class="note-title">${note.title}</div>
+                    <div class="note-content">${note.content}</div>
+                    <div class="note-date">${new Date(note.date).toLocaleDateString()}</div>
+                    <button class="btn btn-danger" onclick="deleteNote(${note.id})" style="margin-top: 10px;">Delete</button>
+                `;
+                
+                notesListEl.appendChild(div);
+            });
+        }
+
+        // Salary and shift functions
+        function updateSalary(operation) {
+            const salaryInput = document.getElementById('salary-input');
+            const amount = parseInt(salaryInput.value) || 0;
+            
+            if (amount !== 0) {
+                if (operation === 'add') {
+                    monthlyData[currentMonth].monthlySalary += amount;
+                } else {
+                    monthlyData[currentMonth].monthlySalary -= amount;
+                }
+                
+                saveData();
+                updateSalaryDisplay();
+                salaryInput.value = '';
+            }
+        }
+
+        function updateShiftCost() {
+            const shiftCostInput = document.getElementById('shift-cost-input');
+            const cost = parseInt(shiftCostInput.value);
+            
+            if (cost > 0) {
+                monthlyData[currentMonth].shiftCost = cost;
+                saveData();
+                updateSalaryDisplay();
+                shiftCostInput.value = '';
+            }
+        }
+
+        function updateShiftsWorked(change) {
+            monthlyData[currentMonth].shiftsWorked += change;
+            if (monthlyData[currentMonth].shiftsWorked < 0) {
+                monthlyData[currentMonth].shiftsWorked = 0;
+            }
+            saveData();
+            updateSalaryDisplay();
+        }
+
+        // Monthly history
+        function renderMonthlyHistory() {
+            monthlyHistoryEl.innerHTML = '';
+            
+            const months = Object.keys(monthlyData).sort().reverse();
+            
+            if (months.length === 0) {
+                monthlyHistoryEl.innerHTML = '<p>No monthly data available.</p>';
+                return;
+            }
+            
+            months.forEach(month => {
+                const data = monthlyData[month];
+                const incomeFromShifts = data.shiftCost * data.shiftsWorked;
+                const totalIncome = data.monthlySalary + incomeFromShifts;
+                const totalExpenses = data.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+                const balance = totalIncome - totalExpenses;
+                
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                
+                div.innerHTML = `
+                    <div>
+                        <strong>${formatMonthKey(month)}</strong>
+                        <div>Shifts: ${data.shiftsWorked} | Salary: ₽${data.monthlySalary.toLocaleString()}</div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div>Income: ₽${totalIncome.toLocaleString()}</div>
+                        <div>Expenses: ₽${totalExpenses.toLocaleString()}</div>
+                        <div><strong>Balance: ₽${balance.toLocaleString()}</strong></div>
+                    </div>
+                `;
+                
+                monthlyHistoryEl.appendChild(div);
+            });
+        }
+
+        // Download Excel function
+        function downloadSalaryExcel() {
+            const data = monthlyData[currentMonth];
+            const incomeFromShifts = data.shiftCost * data.shiftsWorked;
+            const totalIncome = data.monthlySalary + incomeFromShifts;
+            const totalExpenses = data.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+            const balance = totalIncome - totalExpenses;
+            
+            // Prepare data for Excel
+            const excelData = [
+                ["iManager Monthly tracker Details", "", "", ""],
+                ["Month:", formatMonthKey(currentMonth), "", ""],
+                ["", "", "", ""],
+                ["Salary Overview", "", "", ""],
+                ["Monthly Salary", `₽${data.monthlySalary.toLocaleString()}`, "", ""],
+                ["Shifts Worked", data.shiftsWorked, "", ""],
+                ["Shift Cost", `₽${data.shiftCost.toLocaleString()}`, "", ""],
+                ["Income from Shifts", `₽${incomeFromShifts.toLocaleString()}`, "", ""],
+                ["Total Income", `₽${totalIncome.toLocaleString()}`, "", ""],
+                ["Total Expenses", `₽${totalExpenses.toLocaleString()}`, "", ""],
+                ["Current Balance", `₽${balance.toLocaleString()}`, "", ""],
+                ["", "", "", ""],
+                ["Expense Categories", "Amount", "", ""]
+            ];
+            
+            // Add expense categories
+            const categories = {};
+            data.expenses.forEach(expense => {
+                if (!categories[expense.category]) {
+                    categories[expense.category] = 0;
+                }
+                categories[expense.category] += expense.amount;
+            });
+            
+            Object.keys(categories).forEach(category => {
+                const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
+                excelData.push([categoryName, `₽${categories[category].toLocaleString()}`, "", ""]);
+            });
+            
+            excelData.push(["", "", "", ""]);
+            excelData.push(["Recent Expenses", "Amount", "Category", "Date"]);
+            
+            // Add recent expenses
+            const recentExpenses = [...data.expenses].reverse().slice(0, 10);
+            recentExpenses.forEach(expense => {
+                const categoryName = expense.category.charAt(0).toUpperCase() + expense.category.slice(1);
+                const date = new Date(expense.date).toLocaleDateString();
+                excelData.push([expense.name, `₽${expense.amount.toLocaleString()}`, categoryName, date]);
+            });
+            
+            // Create worksheet
+            const ws = XLSX.utils.aoa_to_sheet(excelData);
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Salary Details");
+            
+            // Generate Excel file and trigger download
+            XLSX.writeFile(wb, `iManager_tracker_${currentMonth}.xlsx`);
+        }
+
+        // Save all data to localStorage
+        function saveData() {
+            localStorage.setItem('iManager_monthlyData', JSON.stringify(monthlyData));
+            localStorage.setItem('iManager_notes', JSON.stringify(notes));
+        }
+    </script>
+</body>
+</html>
